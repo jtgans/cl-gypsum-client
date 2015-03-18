@@ -3,6 +3,8 @@
 =gypsum-client= is a Common Lisp implementation of a client for the [[http://www.github.com/jtgans/gypsum][Gypsum]]
 protocol.
 
+This was originally designed for the Navi project.
+
 Note: Gypsum and this Gypsum client are in constant flux. This code is pre-alpha
 quality, and has not seen much testing. I can prove that it works for me, but it
 may not work for your usage goals.
