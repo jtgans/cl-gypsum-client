@@ -1,4 +1,4 @@
-* cl-gypsum-client: a Gypsum client implementation for Common Lisp
+* A Gypsum client implementation for Common Lisp
 
 =cl-gypsum-client= is a Common Lisp implementation of a client for the [[http://www.github.com/jtgans/gypsum][Gypsum]]
 protocol.
