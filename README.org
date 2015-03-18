@@ -1,0 +1,25 @@
+* gypsum-client: a Gypsum client for Common Lisp
+
+=gypsum-client= is a Common Lisp implementation of a client for the [[http://www.github.com/jtgans/gypsum][Gypsum]]
+protocol.
+
+Note: Gypsum and this Gypsum client are in constant flux. This code is pre-alpha
+quality, and has not seen much testing. I can prove that it works for me, but it
+may not work for your usage goals.
+
+** Building
+
+Use your typical ASDF system definition package, be it the old, deprecated ASDF,
+or quicklisp.
+
+** Running
+
+This library does not currently support establishment of the RFCOMM connection
+to the Gypsum display server, and instead relies upon BlueZ's =/dev/rfcomm=
+devices to function. Unfortunately, this means you have to set this up outside
+of the lisp environment before the client will function at all.
+
+At some point in the future, this will be refactored to be a bit more direct.
+
+This client does, however, support connections via TCP sockets through the
+=connect= function. See that function's =(documentation)= for more information.
