@@ -1,14 +1,14 @@
 ;;;; gypsum-client.asd
 
-(asdf:defsystem #:gypsum-client
+(asdf:defsystem #:cl-gypsum-client
     :description "Client-side implementation of the Gypsum protocol."
     :author "June Tate-Gans <june@theonelab.com>"
-    :license "Commercial"
+    :license "Simplified BSD License"
     :serial t
-    :depends (:alexandria
-              :binary-types
-              :evdev
-              :log4cl)
+    :depends-on (#:alexandria
+                 #:binary-types
+                 #:cl-evdev
+                 #:log4cl)
     :components ((:file "package")
                  (:file "client")
                  (:file "event")
