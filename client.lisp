@@ -23,6 +23,25 @@ the lifetime of a connection. Reset on `connect' or on `reset'.")
 (defvar *write-lock* (make-mutex :name "Gypsum display write lock")
   "Write lock used to serialize calls to `with-gypsum-context'.")
 
+(defun connect-via-rfcomm (&key (device "/dev/rfcomm0"))
+  "Connects to a Gypsum server via a BlueZ RFCOMM device. If DEVICE is
+unspecified, it defaults to /dev/rfcomm0. Returns the newly created command
+stream."
+  (open device :direction :io :if-exists :append))
+
+(defun connect-via-tcp (&key (host "localhost") (port 8888))
+  "Connects to a Gypsum server via TCP on the given HOST and PORT. If HOST or
+PORT are unspecified, they default to localhost and 8888, respectively. Returns
+the newly created command stream."
+  (setf *tcp-socket* (make-instance 'inet-socket :type :stream :protocol :tcp))
+  (socket-connect *tcp-socket*
+                  (host-ent-address (get-host-by-name host))
+                  port)
+  (socket-make-stream *tcp-socket*
+                      :input t
+                      :output t
+                      :auto-close t))
+
 (defun connect (method &key
                          (device "/dev/rfcomm")
                          (host "localhost")
@@ -49,25 +68,6 @@ Returns the newly opened command stream."
               ((eq method :rfcomm) (connect-via-rfcomm :device device))
               (t (error "Expected either :TCP or :RFCOMM as a connect method.")))))
 
-(defun connect-via-rfcomm (&key (device "/dev/rfcomm0"))
-  "Connects to a Gypsum server via a BlueZ RFCOMM device. If DEVICE is
-unspecified, it defaults to /dev/rfcomm0. Returns the newly created command
-stream."
-  (open device :direction :io :if-exists :append))
-
-(defun connect-via-tcp (&key (host "localhost") (port 8888))
-  "Connects to a Gypsum server via TCP on the given HOST and PORT. If HOST or
-PORT are unspecified, they default to localhost and 8888, respectively. Returns
-the newly created command stream."
-  (setf *tcp-socket* (make-instance 'inet-socket :type :stream :protocol :tcp))
-  (socket-connect *tcp-socket*
-                  (host-ent-address (get-host-by-name host))
-                  port)
-  (socket-make-stream *tcp-socket*
-                      :input t
-                      :output t
-                      :auto-close t))
-
 (defun disconnect ()
   "Closes and disconnects the Gypsum command stream and (if connected) TCP
 socket."
@@ -77,12 +77,6 @@ socket."
   (when *tcp-socket*
     (socket-close *tcp-socket*)
     (setf *tcp-socket* nil)))
-
-(defun draw-it (stream &rest forms)
-  "Sends a set of FORMS to the given Gypsum-connected STREAM for drawing."
-  (format stream "~{~S~%~}" (deduplicate-params-in-body forms))
-  (finish-output stream)
-  (values))
 
 (defun deduplicate-params-in-form (form)
   "Iterates through the a Gypsum parameter list of the form (:field value
@@ -106,6 +100,12 @@ socket."
          (when (eq command 'reset)
            (clrhash *cached-params-hash-table*))
          `(,command ,@(deduplicate-params-in-form form))))))
+
+(defun draw-it (stream &rest forms)
+  "Sends a set of FORMS to the given Gypsum-connected STREAM for drawing."
+  (format stream "~{~S~%~}" (deduplicate-params-in-body forms))
+  (finish-output stream)
+  (values))
 
 (defmacro with-gypsum-context (&body body)
   "Converts and sends a BODY of Gypsum drawing primitives to the Gypsum command
