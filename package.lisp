@@ -1,5 +1,5 @@
 ;;;; package.lisp
 
-(defpackage #:gypsum-client
+(defpackage #:cl-gypsum-client
   (:use #:cl #:sb-bsd-sockets #:sb-thread)
   (:documentation "Gypsum protocol drawing primitives and client."))

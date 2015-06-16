@@ -1,4 +1,4 @@
-(in-package :gypsum-client)
+(in-package :cl-gypsum-client)
 
 (export '(connect
           disconnect
