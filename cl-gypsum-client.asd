@@ -12,7 +12,6 @@
     :components ((:file "package")
                  (:file "client")
                  (:file "event")
-                 (:file "handler")
                  (:file "rect")
                  (:file "view")
                  (:file "windowmanager")))
