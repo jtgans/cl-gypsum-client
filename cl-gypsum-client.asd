@@ -10,8 +10,4 @@
                  #:cl-evdev
                  #:log4cl)
     :components ((:file "package")
-                 (:file "client")
-                 (:file "event")
-                 (:file "rect")
-                 (:file "view")
-                 (:file "windowmanager")))
+                 (:file "client")))
