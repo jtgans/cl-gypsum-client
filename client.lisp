@@ -1,7 +1,6 @@
 (in-package :cl-gypsum-client)
 
-(export '(connect
-          disconnect
+(export '(listen
           with-gypsum-context
           box
           text
@@ -43,7 +42,7 @@ the newly created command stream."
                       :auto-close t))
 
 (defun connect (method &key
-                         (device "/dev/rfcomm")
+                         (device "/dev/rfcomm0")
                          (host "localhost")
                          (port 8888))
   "Connects to a Gypsum server. Method must be one of :TCP or :RFCOMM. If
@@ -113,7 +112,11 @@ stream via `draw-it'. Multiple concurrent calls to `with-gypsum-context' are
 serialized via an encapsulated write lock to prevent contexts from overwriting
 one another, so calls should be made as short as possible."
   `(with-mutex (*write-lock*)
-     (draw-it *command-stream* ,@body)))
+     (draw-it *command-stream*
+       ,@(loop while body collecting
+              (let* ((form (pop body))
+                (command (pop form)))
+               `(,(find-symbol (string command) :cl-gypsum-client) ,@form))))))
 
 (defun box (&key start end (filled nil filled-supplied-p) color)
   "Generates a Gypsum drawing primitive to draw a box with the given parameters.
@@ -132,7 +135,7 @@ Valid parameters include:
 
   :color
      A color string. Either HTML-style #RRGGBB or #AARRGGBB, or a color name."
-  `(box
+  `(:box
     ,@(when start (list :start start))
     ,@(when end (list :end end))
     ,@(when filled-supplied-p (list :filled filled))
@@ -141,7 +144,7 @@ Valid parameters include:
 (defun commit ()
   "Generates a Gypsum drawing primitive to commit the existing batched
 primitives to the screen."
-  '(commit))
+  '(:commit))
 
 (defun text (&key text start font size color (filled nil filled-supplied-p))
   "Generates a Gypsum drawing primitive to draw text with the given parameters.
@@ -163,7 +166,7 @@ Valid parameters include:
 
   :color
     A color string. Either HTML-style #RRGGBB or #AARRGGBB, or a color name."
-  `(text
+  `(:text
     ,@(when text (list :text text))
     ,@(when start (list :start start))
     ,@(when font (list :font font))
@@ -182,16 +185,16 @@ given parameters. Valid parameters include:
   :end
     Coordinate. A cons cell containing the x and y coordinates of the lower
     right corner of the clipping rectangle."
-  `(clip
+  `(:clip
     ,@(when start (list :start start))
     ,@(when end (list :end end))))
 
 (defun reset-clip ()
   "Generates a Gypsum drawing primitive to reset the clipping region."
-  '(reset-clip))
+  '(:reset-clip))
 
 (defun reset ()
-  '(reset))
+  '(:reset))
 
 (defun draw-dialog (x y width height title)
   "Draws a dialog to Gypsum's display."
